@@ -1,22 +1,58 @@
 const http = require('http')
 
-//We are acting like there is a real sensor, so we need random float in range
-function getRandomNumber(min, max) {
-    let n = Math.random() * (max - min) + min;
-    return Number(n).toFixed(1) //we stop at first decimal
+//We use this function to round the generated values using a given precision
+function roundWithMaxPrecision (n, precision) {
+    const precisionWithPow10 = Math.pow(10, precision);
+    return Math.round(n * precisionWithPow10) / precisionWithPow10;
 }
+
+//We would like to emulate a real sensor, so we are going to random generate a value between min and max
+function getRandomNumber(min, max, decimal) {
+    let n = Math.random() * (max - min) + min;
+    if (decimal){
+        return roundWithMaxPrecision(n, 1)//we stop at first decimal here, for example in the case of Body Temperature.
+    }
+    else return Math.ceil(n) //No decimal precision here because we are working with Heart Rate
+
+}
+
+//Since we are emulating real sensors, we need the values to slightly change in time according to a percentage
+function slightlyChange(num, decimal) {
+    let x = Math.random();
+    if(x < 0.15){
+        if (decimal){
+            return num - 0.1;
+        }
+        else return num - 1;
+    }
+    if(x > 0.85){
+        if (decimal){
+            return num + 0.1;
+        }
+        else return num + 1
+    }
+    else {
+        return num;
+    }
+}
+
+let startingtemp = getRandomNumber(36.3, 37.1, true);
+let startinghr = getRandomNumber(60, 121, false);
 
 //Read values to send every 2 sec
 setInterval(function() {
     const date = new Date();
-    const bodytemp = getRandomNumber(36.3, 36.8);
-    console.log('Body temperature:', bodytemp + 'C');
-    console.log(date);
+    let bodytemp = slightlyChange(startingtemp, true);
+    let hr = slightlyChange(startinghr);
+    console.log('Body temperature: '+bodytemp + '°C');
+    console.log('Heart rate: '+ hr + ' BPM');
+    //console.log(date);
 
     const data = JSON.stringify({
-        'sensor': 'Body Temperature',
+        'sensor': 'Mario Rossi',
         'timestamp': date,
-        'temperature': bodytemp
+        'temperature': bodytemp,
+        'heartrate': hr
     })
 
     const options = {

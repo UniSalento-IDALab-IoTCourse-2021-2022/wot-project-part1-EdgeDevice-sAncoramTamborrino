@@ -21,15 +21,15 @@ function slightlyChange(num, decimal) {
     let x = Math.random();
     if(x < 0.15){
         if (decimal){
-            return num - 0.1;
+            return roundWithMaxPrecision(num - 0.1, 1);
         }
-        else return num - 1;
+        else return roundWithMaxPrecision(num - 1, 0);
     }
     if(x > 0.85){
         if (decimal){
-            return num + 0.1;
+            return roundWithMaxPrecision(num + 0.1, 1);
         }
-        else return num + 1
+        else return roundWithMaxPrecision(num + 1, 0);
     }
     else {
         return num;
@@ -37,27 +37,35 @@ function slightlyChange(num, decimal) {
 }
 
 let startingtemp = getRandomNumber(36.3, 37.1, true);
-let startinghr = getRandomNumber(60, 121, false);
+let startinghr = getRandomNumber(60, 121);
+let startingrespbpm = getRandomNumber(12, 17);
+let startingspo2 = getRandomNumber(97, 100);
 
 //Read values to send every 2 sec
 setInterval(function() {
     const date = new Date();
     let bodytemp = slightlyChange(startingtemp, true);
     let hr = slightlyChange(startinghr);
-    console.log('Body temperature: '+bodytemp + '°C');
-    console.log('Heart rate: '+ hr + ' BPM');
+    let respbpm = slightlyChange(startingrespbpm);
+    let spo2 = startingspo2;
+    console.log('Body temperature: '+bodytemp+'°C')
+    console.log('Heart rate: '+hr+' BPM');
+    console.log('Respiratory rate: '+respbpm+' BPM')
+    console.log('Oxygen saturation: '+spo2+'%');
     //console.log(date);
 
     const data = JSON.stringify({
         'sensor': 'Mario Rossi',
         'timestamp': date,
         'temperature': bodytemp,
-        'heartrate': hr
+        'heartrate': hr,
+        'resprate': respbpm,
+        'oxygensat': spo2
     })
 
     const options = {
 
-        hostname: '192.168.1.39',
+        hostname: '127.0.0.1',
         port: 3000,
         path: '/temperature',
         method: 'POST',
@@ -70,9 +78,12 @@ setInterval(function() {
     const req = http.request(options, res => {
         console.log(`statusCode: ${res.statusCode}`);
 
+
         //define the callback function that will print the result of the request in case of success
         res.on('data', d => {
             process.stdout.write(d);
+            console.log('\n--------------------------------------------');
+
         })
 
         //define the callback function that will print the result of the request in case of error

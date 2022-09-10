@@ -1,4 +1,25 @@
 const http = require('http')
+var fs = require('fs');
+
+function download(url, dest, cb) {
+    var file = fs.createWriteStream(dest);
+    http.get(url, function(response) {
+        response.pipe(file);
+        file.on('finish', function() {
+            file.close(cb);
+        });
+    });
+}
+
+function checkModel() {
+    if(fs.existsSync('model.joblib')){
+        console.log("The edge device found a model.")
+    }
+    else{
+        console.log("Model not found. I'm downloading...")
+        download('http://192.168.1.39:3000/download', 'model.joblib')
+    }
+}
 
 //We use this function to round the generated values using a given precision
 function roundWithMaxPrecision (n, precision) {
@@ -36,6 +57,7 @@ function slightlyChange(num, decimal) {
     }
 }
 
+checkModel()
 let startingtemp = getRandomNumber(36.3, 37.1, true);
 let startinghr = getRandomNumber(60, 121);
 let startingrespbpm = getRandomNumber(12, 17);
@@ -65,7 +87,7 @@ setInterval(function() {
 
     const options = {
 
-        hostname: '127.0.0.1',
+        hostname: '192.168.1.39',
         port: 3000,
         path: '/temperature',
         method: 'POST',

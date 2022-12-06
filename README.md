@@ -15,3 +15,8 @@ To give a better understanding of the architecture of the system, the following 
 
 
 ![iotarch](https://user-images.githubusercontent.com/106089600/202003221-f3a556e3-e22e-4b43-8f91-3e7255d2c3a8.png)
+
+The purpose of this component is to gather data from sensors and to build a dataframe which will be fed to the already trained model with machine learning to inspect the current situation and give a feedback to the server. Indeed, the edge will send to the server either the data from sensors either the outcome of the prediction according to the model.
+
+To make the system work in the proper way in locale all the components must be in the same working directory with the following structure.
+<img width="325" alt="Schermata 2022-10-25 alle 20 10 26" src="https://user-images.githubusercontent.com/106089600/205873399-49d2b136-8573-44a6-8a59-faf015b740b4.png">
